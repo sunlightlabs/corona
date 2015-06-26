@@ -112,14 +112,15 @@
        second))
 
 (defn eval-arg [{:keys [env variables driver]} arg]
-  (if (satisfies? browser-executable arg)
-    (eval-in-browser arg driver env)
-    arg))
+  (cond
+    (satisfies? browser-executable arg) (eval-in-browser arg driver env)
+    (env arg)   (env arg)
+    :else arg))
 
 
 (defmulti  execute-action  (fn [_ action] (first action)))
-(defmethod execute-action :action/navigate [{:keys [env variables driver] :as state} [_ arg]]
-  (taxi/to driver (eval-arg state arg)))
+(defmethod execute-action :action/visit [{:keys [env variables driver] :as state} [_ arg]]
+  (taxi/to driver (spy (eval-arg state arg))))
 
 (defmethod execute-action :action/observe [{:keys [env variables driver] :as state} [_ arg]]
   (as-> arg $
@@ -128,6 +129,8 @@
     (assoc state :variables $)))
 
 (defn execute-task [{:keys [task/actions] :as task} env driver]
+  (info "Executing task")
+  (info env)
   (reduce execute-action {:env env
                           :variables {}
                           :driver driver}
@@ -136,15 +139,11 @@
 (defn execute-step [{:keys [mission/tasks] :as plan} next-steps driver]
   (->> next-steps
        (mapcat (fn [[task envs]] (cart [[task] envs])))
-       (map (fn [[task env]] (execute-task (tasks task) env driver)))
+       (map    (fn [[task env]] (execute-task (tasks task) env driver)))
        (map :variables)
        (update [ALL ALL LAST] vector)
-       (apply merge-with concat)
-       ;;       (apply merge-with concat)
-       pprint
-       )
-  {}
-  )
+       (apply merge-with concat)))
+
 (defn execute-plan
   [{:keys [mission/parameters     mission/variables mission/schema
            mission/surrogate-keys mission/tasks]

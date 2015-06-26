@@ -31,9 +31,8 @@
  ;;on the type of leaf? Throw errors if they don't match?
  
  :mission/variables
- {rep-url ["www.ohiohouse.gov/christina-hagan"
-           "double.gov"]
-  committee-url ["broken.gov"]
+ {rep-url ["www.ohiohouse.gov/christina-hagan"]
+  committee-url []
   fake-number []}
  ;;there will be multiple ways to go to the same page. How to keep the stubs/urls in parity?
  ;; Declare interactions between variables somehow? Core.logic maybe. mission/logic?
