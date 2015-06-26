@@ -1,0 +1,81 @@
+;;When submitted an id is automatically created 
+;;Can work without namespaces? 
+{:mission/description
+ "A mission that collects information about the ohio state legislature."
+ 
+ :mission/parameters
+ {:parameter/schedule "0 0 * * * *"
+  :parameter/driver {:browser :htmlunit}}
+ 
+ :mission/schema
+ {Person
+  (or {:person/name str
+       :person/webpage str ;;href
+       :person/committees (or [Committee] refs)
+       :person/photo str}
+      {:person/name str
+       :person/biography str})
+  Committee
+  ;;chair, vice chairmen
+  (or {:committee/name str
+       :committee/webpage str
+       :committee/members (or [Person] refs)}
+      {:committee/name str
+       :committee/webpage str})}
+ 
+ :mission/surrogate-keys ;;either a key or a fn taking in an object. Used to do merge
+ {Person :person/name
+  Committee :committee/name}
+ ;;Default is to use merge-with when records are to be merged. Unsure whether
+ ;;there should be more options or customized options. Could see it be dependent
+ ;;on the type of leaf? Throw errors if they don't match?
+ 
+ :mission/variables
+ {rep-url ["www.ohiohouse.gov/christina-hagan"
+           "double.gov"]
+  committee-url ["broken.gov"]
+  fake-number []}
+ ;;there will be multiple ways to go to the same page. How to keep the stubs/urls in parity?
+ ;; Declare interactions between variables somehow? Core.logic maybe. mission/logic?
+ ;;:mission/logic 
+ ;;[[rep-stub rep-url]
+ ;; (== rep-url (str "https://www.legislature.ohio.gov/" rep-stub))]
+ 
+ :mission/tasks
+ {gen-fake-numbers
+  {:task/description "Generate some fake numbers"
+   :task/actions
+   [[:action/observe {fake-number #cljs ([] 10)}]]}
+  scrape-rep-page
+  {:task/description "Collect representatives' information."
+   :task/actions
+   [[:action/visit rep-url]
+    [:action/collect Person
+     {:person/name ;;How to do nested things? 
+      #cljs([] (->> (.getElementByClass js/document "title") (take-until (partial = "-")) str))
+      :person/webpage rep-url
+      :person/fake-number fake-number
+      :person/committes (scrape-committee-page Committee {committee-url #enlive [:#.comitteeList :#a]})
+      :person/photo #css ".downloads > div:nth-child (1) > div:nth-child (2) > a:nth-child (1)"}]]} ;;how to grab text from this? 
+  
+  scrape-biography-page
+  {:task/description "Collect legislators' full biography."
+   :task/actions
+   [[:action/visit #cljs([rep-url] (str rep-url "/biography"))]
+    [:action/collect Person
+     {:person/name 
+      #cljs([] (->> (.getElementByClass js/document "contactHeader") (drop 10) (take-until (partial = "<")) str))
+      :person/fake-number fake-number
+      :person/biography #css ".memberBiography > p"}]]}
+  
+  scrape-committee-page
+  {:task/actions
+   [[:action/visit committee-url]
+    [:action/collect Committee
+     {:committee/webpage committee-url
+      :committee/fake-number fake-number
+      :committee/members
+      (scrape-representative-page Person {rep-url #css ".committeeMembersTable >
+                                  table:nth-child(1) > tbody:nth-child(1) >
+                                  tr:nth-child(3) > td:nth-child(1) >
+                                  div:nth-child(2) > a:nth-child(1)"})}]]}}}

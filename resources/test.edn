@@ -1,0 +1,10 @@
+;;When submitted an id is automatically created 
+;;Can work without namespaces? 
+{:mission/description
+ "A mission that collects information about the ohio state legislature."
+
+ :mission/parameters
+ {:parameter/schedule "0 0 * * * *"
+  :parameter/browser :firefox} ;;parameter/broswer should probably just be a map for clj-webdriver to take in
+
+ }
