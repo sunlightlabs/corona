@@ -38,17 +38,25 @@
 (defrecord CljsCode [variables code compiled]
   browser-executable
   (eval-in-browser [this driver env]
-    (let [params (->> env
+    (spy variables)
+    ;;Compiling things all over the place now. HMm.
+    (let [ns-forms (cljs-forms->js '(ns user.func))
+          params (->> env
                       (map (fn [[sym value]] `(def ~sym ~value)))
                       (map cljs-forms->js)
                       (s/join "\n"))
-          script (str params
-                      "var fn = " compiled ";\n"
-                      "return fn.call(" (s/join "," variables)");")]
+          fn-call (cljs-forms->js (concat ['func] variables))
+          script (str ns-forms
+                      "var cljs = {}; cljs.user = {}; "
+                      params
+                      "cljs.user.func = " compiled ";\n"
+                      "return " fn-call ";")]
       (taxi/execute-script driver script))))
 
-(defn symbols->CljsCode [variables & rst]
-  (let [code (concat ['fn variables] rst)]
+(defn symbols->CljsCode [[variables & rst]]
+  (spy variables)
+  (spy (s/join "," variables))
+  (let [code (concat ['defn 'func variables] rst)]
     (->CljsCode variables code (cljs-forms->js code))))
 
 (def readers
