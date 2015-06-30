@@ -51,7 +51,7 @@
    [[:action/visit rep-url]
     [:action/collect Person
      {:person/name ;;How to do nested things? 
-      #cljs([] (->> (.getElementByClass js/document "title") (take-until (partial = "-")) str))
+      #cljs([] (->> (.getElementByClass js/document "title") (take-while (partial not= "-")) str))
       :person/webpage rep-url
       :person/fake-number fake-number
       :person/committes (scrape-committee-page Committee {committee-url #enlive [:#.comitteeList :#a]})
@@ -63,7 +63,7 @@
    [[:action/visit #cljs([rep-url] (str rep-url "/biography"))]
     [:action/collect Person
      {:person/name 
-      #cljs([] (->> (.getElementByClass js/document "contactHeader") (drop 10) (take-until (partial = "<")) str))
+      #cljs([] (->> (.getElementByClass js/document "contactHeader") (drop 10) (take-while (partial not= "<")) str))
       :person/fake-number fake-number
       :person/biography #css ".memberBiography > p"}]]}
   

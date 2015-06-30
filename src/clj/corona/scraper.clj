@@ -1,4 +1,5 @@
 (ns clj.corona.scraper
+  (:refer-clojure :exclude [update])
   (:require [clj-webdriver.taxi :as taxi]
             [clojure.edn :as edn]
             [clojure.java.io :as io]
@@ -6,6 +7,7 @@
             [clojure.data :refer [diff]]
             [com.rpl.specter :refer :all]
             [clojure.pprint :refer [pprint]]
+            [cljs.build.api :as build]
             [cljs.compiler.api :as compiler]
             [taoensso.timbre :as timbre]
             [clojure.string :as s]))
@@ -26,10 +28,14 @@
           more (cart (rest colls))]
       (cons x more))))
 
+(extend-protocol cljs.closure/Compilable
+  clojure.lang.LazySeq
+  (-compile [this opts] (cljs.closure/compile-form-seq this)))
+
 (defn cljs-forms->js [forms]
-  (->> forms
-       (cljs.analyzer/analyze '{:ns {:name cljs.user} :locals {}})
-       compiler/emit))
+  (spy (build/build forms
+                     {:optimizations :advanced
+                      :verbose true})))
 
 (defprotocol browser-executable
   "A protocol which takes in a driver and arguments and evaluates a function in the browser."
@@ -54,8 +60,6 @@
       (taxi/execute-script driver script))))
 
 (defn symbols->CljsCode [[variables & rst]]
-  (spy variables)
-  (spy (s/join "," variables))
   (let [code (concat ['defn 'func variables] rst)]
     (->CljsCode variables code (cljs-forms->js code))))
 
@@ -173,3 +177,5 @@
                    (merge-with (comp set concat) examined next-steps))))))))
 
 ;(execute-plan example)
+
+
