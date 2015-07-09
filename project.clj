@@ -9,18 +9,18 @@
 
   :test-paths ["spec/clj"]
 
-  :dependencies [[org.clojure/clojure "1.7.0-RC1"]
-                 [org.clojure/clojurescript "0.0-3308" :scope "provided"]
+  :dependencies [[org.clojure/clojure "1.7.0"]
+                 [org.clojure/clojurescript "0.0-3308"]
                  [ring "1.3.2"]
                  [ring/ring-defaults "0.1.5"]
                  [compojure "1.3.4"]
                  [enlive "1.1.5"]
                  [com.taoensso/timbre "4.0.2"]
-                 [org.omcljs/om "0.8.8"]
-                 [racehub/om-bootstrap "0.5.1" :exclusions [org.clojure/core.cache]]
-                 [com.rpl/specter "0.5.4"]
-                 [clj-webdriver "0.6.1"]
-                 [bidi "1.19.1"]
+                 [org.omcljs/om "0.9.0"]
+                 [racehub/om-bootstrap "0.5.1"]
+                 [com.rpl/specter "0.6.2"]
+;                 [clj-webdriver "0.6.1"]
+                 [bidi "1.20.1"]
                  [environ "1.0.0"]]
 
   :plugins [[lein-cljsbuild "1.0.5"]
@@ -41,15 +41,15 @@
   :profiles {:dev {:source-paths ["env/dev/clj"]
                    :test-paths ["test/clj"]
 
-                   :dependencies [[figwheel "0.3.3" :exclusions [org.clojure/core.cache]]
-                                  [figwheel-sidecar "0.3.3" :exclusions [org.clojure/core.cache]]
+                   :dependencies [[figwheel "0.3.7"]
+                                  [figwheel-sidecar "0.3.7"]
                                   [com.cemerick/piggieback "0.2.1"]
                                   [weasel "0.7.0"]]
 
                    :repl-options {:init-ns corona.server
                                   :nrepl-middleware [cemerick.piggieback/wrap-cljs-repl]}
 
-                   :plugins [[lein-figwheel "0.3.3"]]
+                   :plugins [[lein-figwheel "0.3.7"]]
 
                    :figwheel {:http-server-root "public"
                               :server-port 3449
