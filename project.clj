@@ -19,7 +19,7 @@
                  [org.omcljs/om "0.9.0"]
                  [racehub/om-bootstrap "0.5.1"]
                  [com.rpl/specter "0.6.2"]
-;                 [clj-webdriver "0.6.1"]
+                 [clj-webdriver "0.6.1" :exclusions [org.clojure/core.cache]]
                  [bidi "1.20.1"]
                  [environ "1.0.0"]]
 
