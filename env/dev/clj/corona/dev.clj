@@ -6,9 +6,8 @@
             [figwheel-sidecar.auto-builder :as fig-auto]
             [figwheel-sidecar.core :as fig]
             [clojurescript-build.auto :as auto]
-            [clojure.java.shell :refer [sh]]))
-
-(def is-dev? (env :is-dev))
+            [clojure.java.shell :refer [sh]]
+            [com.stuartsierra.component :as component]))
 
 (def inject-devmode-html
   (comp
@@ -31,4 +30,17 @@
                                      :source-map-timestamp true
                                      :preamble             ["react/react.min.js"]}}]
                 :figwheel-server server}]
-    (fig-auto/autobuild* config)))
+    {:server server
+     :autobuilder (fig-auto/autobuild* config)}))
+
+(defrecord FigwheelServer [is-dev?]
+  component/Lifecycle
+  (start [component]
+    (merge component (if is-dev? (start-figwheel) nil)))
+  (stop [{:keys [server autobuilder] :as component}]
+    (when autobuilder (auto/stop-autobuild! autobuilder))
+    (when server (fig/stop-server      server))
+    (merge component {:server nil :autobuilder nil})))
+
+(defn new-figwheel [is-dev?]
+  (map->FigwheelServer {:is-dev? is-dev?}))

@@ -60,9 +60,10 @@
                    :dependencies [[figwheel "0.3.7"]
                                   [figwheel-sidecar "0.3.7"]
                                   [com.cemerick/piggieback "0.2.1"]
-                                  [weasel "0.7.0"]]
+                                  [weasel "0.7.0"]
+                                  ]
 
-                   :repl-options {:init-ns corona.server
+                   :repl-options {:init-ns user
                                   :nrepl-middleware [cemerick.piggieback/wrap-cljs-repl]}
 
                    :plugins [[lein-figwheel "0.3.7"]]

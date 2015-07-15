@@ -1,5 +1,5 @@
-(ns clj.corona.scraper
-  (:refer-clojure :exclude [update])
+(ns corona.scraper
+  (:use com.rpl.specter)
   (:require [clj-webdriver.taxi :as taxi]
             [clojure.edn :as edn]
             [clojure.java.io :as io]
@@ -11,7 +11,7 @@
             [cljs.compiler.api :as compiler]
             [taoensso.timbre :as timbre]
             [clojure.string :as s]
-            [clj.corona.characteristics :refer [characteristics-of-tasks]]))
+            [corona.characteristics :refer [characteristics-of-tasks]]))
 
 (timbre/refer-timbre)
 ;; Copied verbatim from the defunct clojure-contrib (http://bit.ly/deep-merge-with)
@@ -73,7 +73,7 @@
 (defn read-format [s]
   (clojure.edn/read-string {:readers readers} s))
 
-(def example (-> (io/resource "example.edn") slurp read-format))
+#_(def example (-> (io/resource "example.edn") slurp read-format))
 
 (defn declared-variables-match-used-variables [{:keys [mission/tasks mission/variables]}]
   (= (set (keys variables))
@@ -113,7 +113,7 @@
 
 (defmethod execute-action :action/observe [{:keys [env variables driver] :as state} [_ arg]]
   (as-> arg $
-    (update [ALL LAST] (partial eval-arg state) $)
+    (transform [ALL LAST] (partial eval-arg state) $)
     (merge-with concat variables $)
     (assoc state :variables $)))
 

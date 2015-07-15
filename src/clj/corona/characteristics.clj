@@ -1,6 +1,5 @@
-(ns clj.corona.characteristics
-  (:refer-clojure :exclude [update])
-  (:require [com.rpl.specter :refer :all]))
+(ns corona.characteristics
+  (:use com.rpl.specter))
 
 (defn characteristics-of-function-or-symbol [arg]
   (or (:params arg) (when (symbol? arg) [arg])))
@@ -25,4 +24,4 @@
   (apply merge-with (comp set concat) (map characteristics-of-an-action actions)))
 
 (defn characteristics-of-tasks [tasks]
-  (update [ALL LAST] characteristics-of-a-task tasks))
+  (transform [ALL LAST] characteristics-of-a-task tasks))

@@ -16,7 +16,7 @@
   (def chsk-state state)   ; Watchable, read-only atom
   )
 
-(defonce app-state (atom {:text "Hello Idiot!"}))
+(defonce app-state (atom {:text "Hello Zack!"}))
 
 (defn main []
   (om/root
